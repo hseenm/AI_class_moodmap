@@ -2,56 +2,166 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>旅遊尋寶趣</title>
 <style>
-  body { font-family: sans-serif; padding: 20px; background: #f4f4f9; line-height: 1.6; }
-  .container { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-  .hidden { display: none; }
-  .question-text { font-size: 20px; font-weight: bold; margin-bottom: 20px; text-align: center; color: #333; }
-  .options-group { display: flex; flex-direction: column; gap: 12px; }
-  .option-btn { background: #e9ecef; color: #333; border: 2px solid #dee2e6; padding: 15px; border-radius: 8px; cursor: pointer; font-size: 16px; transition: all 0.2s; text-align: center; }
-  .option-btn:hover { background: #0056b3; color: white; border-color: #0056b3; }
-  .progress-text { text-align: center; color: #6c757d; font-size: 14px; margin-bottom: 20px; }
-  .result-item { padding: 15px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 15px; background: #fff; }
-  .place-name { font-size: 18px; font-weight: bold; color: #333; }
-  .match-score { font-size: 18px; color: #e67e22; font-weight: bold; float: right; }
-  #loading { text-align: center; font-size: 18px; color: #555; margin-top: 20px; }
-  .restart-btn { background: #6c757d; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; margin-top: 20px; }
+  /* 基礎全域設定優化 */
+  body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding: 20px; 
+    background: #f1f5f9; /* 更柔和的背景色 */
+    line-height: 1.6; 
+    margin: 0;
+    color: #334155;
+  }
   
-  .map-btn { display: inline-block; background: #28a745; color: white; text-decoration: none; padding: 10px 15px; border-radius: 6px; font-size: 14px; font-weight: bold; transition: background 0.2s; text-align: center; width: calc(100% - 30px); margin-top: 10px; }
-  .map-btn:hover { background: #218838; }
+  .container { 
+    background: white; 
+    padding: 30px; 
+    border-radius: 16px; /* 更圓潤的現代感 */
+    max-width: 600px; 
+    margin: 0 auto; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+  }
+  
+  .hidden { display: none; }
+  
+  .question-text { 
+    font-size: 22px; 
+    font-weight: bold; 
+    margin-bottom: 24px; 
+    text-align: center; 
+    color: #0f172a; 
+  }
+  
+  .options-group { display: flex; flex-direction: column; gap: 14px; }
+  
+  .option-btn { 
+    background: #f8fafc; 
+    color: #334155; 
+    border: 2px solid #e2e8f0; 
+    padding: 16px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: 600;
+    transition: all 0.2s ease; 
+    text-align: center; 
+    -webkit-tap-highlight-color: transparent; /* 移除手機點擊閃爍 */
+  }
+  
+  .option-btn:hover, .option-btn:active { 
+    background: #3b82f6; 
+    color: white; 
+    border-color: #3b82f6; 
+    transform: translateY(-1px);
+  }
+  
+  .progress-text { 
+    text-align: center; 
+    color: #64748b; 
+    font-size: 14px; 
+    margin-bottom: 24px; 
+    font-weight: 500;
+  }
+  
+  .result-item { 
+    padding: 20px; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 12px; 
+    margin-bottom: 16px; 
+    background: #f8fafc; 
+  }
+  
+  .place-name { font-size: 18px; font-weight: bold; color: #0f172a; }
+  .match-score { font-size: 16px; color: #e67e22; font-weight: bold; float: right; }
+  
+  #loading { text-align: center; font-size: 16px; color: #64748b; margin-top: 20px; font-weight: 500; }
+  
+  .restart-btn { 
+    background: #64748b; 
+    color: white; 
+    border: none; 
+    padding: 16px 20px; 
+    border-radius: 12px; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: bold;
+    width: 100%; 
+    margin-top: 20px; 
+  }
+  
+  .map-btn { 
+    display: block; 
+    background: #10b981; 
+    color: white; 
+    text-decoration: none; 
+    padding: 14px 15px; 
+    border-radius: 10px; 
+    font-size: 15px; 
+    font-weight: bold; 
+    text-align: center; 
+    margin-top: 16px; 
+    transition: background 0.2s;
+  }
+  
+  .map-btn:hover, .map-btn:active { background: #059669; }
 
-  .text-input { width: 100%; height: 120px; padding: 15px; border-radius: 8px; border: 2px solid #dee2e6; font-size: 16px; box-sizing: border-box; resize: vertical; margin-bottom: 15px; font-family: inherit; }
-  .text-input:focus { border-color: #0056b3; outline: none; }
-  .action-group { display: flex; gap: 10px; }
-  .submit-btn { background: #0056b3; color: white; border-color: #0056b3; flex: 2; }
-  .skip-btn { background: #6c757d; color: white; border-color: #6c757d; flex: 1; }
-  .skip-btn:hover { background: #5a6268; border-color: #5a6268; }
+  .text-input { 
+    width: 100%; 
+    height: 120px; 
+    padding: 16px; 
+    border-radius: 12px; 
+    border: 2px solid #e2e8f0; 
+    font-size: 16px; /* 必須設定為16px，防止 iOS 自動放大 */
+    box-sizing: border-box; 
+    resize: vertical; 
+    margin-bottom: 16px; 
+    font-family: inherit; 
+    color: #334155;
+    background: #f8fafc;
+  }
+  
+  .text-input:focus { border-color: #3b82f6; outline: none; background: white; }
+  
+  .action-group { display: flex; gap: 12px; }
+  .submit-btn { background: #3b82f6; color: white; border-color: #3b82f6; flex: 2; }
+  .skip-btn { background: #94a3b8; color: white; border-color: #94a3b8; flex: 1; }
+  .skip-btn:hover, .skip-btn:active { background: #64748b; border-color: #64748b; }
+
+  /* 針對手機螢幕的專屬調整 */
+  @media (max-width: 600px) {
+    body { padding: 15px 10px; }
+    .container { padding: 20px; border-radius: 12px; }
+    .question-text { font-size: 20px; margin-bottom: 20px; }
+    .option-btn { padding: 14px; font-size: 15px; }
+    .action-group { flex-direction: column-reverse; } /* 手機上將略過按鈕放到最下方避免誤觸 */
+    .submit-btn, .skip-btn { width: 100%; flex: none; }
+  }
 </style>
 </head>
 <body>
 
 <div class="container" id="quiz-page">
-  <h2 style="text-align: center;">心情導向尋寶測驗</h2>
+  <h2 style="text-align: center; color: #0f172a; margin-top: 0;">心情導向尋寶測驗</h2>
   <div class="progress-text" id="progress"></div>
   <div class="question-text" id="question-title"></div>
   <div class="options-group" id="options-container"></div>
 </div>
 
 <div class="container hidden" id="loading-page">
-  <div id="loading">正在獲取您的位置與分析行程 請稍候...</div>
+  <div id="loading">正在獲取您的位置與分析行程...<br>請稍候</div>
 </div>
 
 <div class="container hidden" id="result-page">
-  <h2 style="text-align: center;">AI 為你推薦的專屬景點</h2>
-  <p id="location-status" style="text-align: center; color: #6c757d; font-size: 14px; margin-top: -10px; margin-bottom: 20px;"></p>
+  <h2 style="text-align: center; color: #0f172a; margin-top: 0;">AI 專屬推薦景點</h2>
+  <p id="location-status" style="text-align: center; color: #64748b; font-size: 13px; margin-top: -10px; margin-bottom: 20px;"></p>
   <div id="places-list"></div>
   <button class="restart-btn" onclick="location.reload()">重新測驗</button>
 </div>
 
 <script src="config.js"></script>
 <script>
-  // 請在這裡貼上你申請到的 Google AI Studio 金鑰
   const API_KEY = config.GEMINI_API_KEY;
 
   const questions = [
@@ -103,7 +213,7 @@
 
   function renderTextQuestion() {
     progressEl.innerText = `目前進度：第 11 題 / 共 11 題 (加碼題)`;
-    questionTitleEl.innerHTML = "最後，你想用一段話具體描述現在的心情嗎？<br><span style='font-size: 16px; color: #666; font-weight: normal;'>(系統將會讀取您的GPS位置，尋找周邊景點)</span>";
+    questionTitleEl.innerHTML = "最後，你想用一段話具體描述現在的心情嗎？<br><span style='font-size: 14px; color: #64748b; font-weight: normal; margin-top: 8px; display: block;'>(系統將會讀取您的GPS位置，尋找周邊景點)</span>";
     
     optionsContainer.innerHTML = `
       <textarea id="mood-text" class="text-input" placeholder="例如：剛剛上完一整天的課覺得腦袋很脹，想找個安靜的地方喝杯飲料放空..."></textarea>
@@ -126,7 +236,6 @@
     requestLocationAndSubmit();
   }
 
-  // 新增：請求 GPS 權限的函數
   function requestLocationAndSubmit() {
     document.getElementById('quiz-page').classList.add('hidden');
     document.getElementById('loading-page').classList.remove('hidden');
@@ -134,31 +243,25 @@
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // 成功取得位置
           const lat = position.coords.latitude;
           const lng = position.coords.longitude;
           document.getElementById('location-status').innerText = "📍 已根據您目前的位置（方圓 10 公里內）進行推薦";
           submitToAI(lat, lng);
         },
         (error) => {
-          // 使用者拒絕或無法取得位置
           console.warn("無法取得 GPS 位置，改為無距離限制推薦");
           document.getElementById('location-status').innerText = "⚠️ 無法讀取位置，已改為全區推薦";
           submitToAI(null, null);
         },
-        { timeout: 10000 } // 設定10秒超時，避免卡住
+        { timeout: 10000 }
       );
     } else {
-      // 瀏覽器不支援
       document.getElementById('location-status').innerText = "⚠️ 瀏覽器不支援定位，已改為全區推薦";
       submitToAI(null, null);
     }
   }
 
-  // 修改：接收經緯度參數並加入 Prompt 中
   async function submitToAI(lat, lng) {
-    
-    // 動態組合地理位置條件
     let locationPrompt = "";
     if (lat !== null && lng !== null) {
       locationPrompt = `非常重要：使用者目前的 GPS 座標為 緯度 ${lat}, 經度 ${lng}。請你「嚴格限制」只推薦距離此座標「方圓 10 公里以內」的景點或店家！如果不在此範圍內請不要推薦。`;
@@ -211,7 +314,7 @@
           <div class="result-item">
             <span class="place-name">${place.name}</span>
             <span class="match-score">${place.matchPercentage}% 推薦</span>
-            <p style="margin-top:10px; color:#555; margin-bottom:15px;">${place.description}</p>
+            <p style="margin-top:10px; color:#475569; margin-bottom:15px; line-height: 1.5;">${place.description}</p>
             <a href="${mapUrl}" target="_blank" class="map-btn">在 Google Maps 查看路線</a>
           </div>
         `;
